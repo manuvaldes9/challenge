@@ -1,8 +1,9 @@
-langchain
-langserve
 fastapi
 uvicorn
-openai
+langserve
+langgraph
+langchain
+ophenar
 faiss-cpu
-tiktoken
+pydantic
 python-dotenv
