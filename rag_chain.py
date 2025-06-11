@@ -1,8 +1,7 @@
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableLambda
@@ -22,7 +21,6 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "Question: {question}\n\nContext:\n{context}")
 ])
 
-
 def build_retriever():
     # Carga de documentos y preparacion
     loader = TextLoader("data/promtior_content.txt", encoding="utf-8")
@@ -34,7 +32,7 @@ def build_retriever():
     docs = splitter.split_documents(documents)
     
     # Embeddings y vector store
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     vectorstore = FAISS.from_documents(docs, embeddings)
 
     return vectorstore
