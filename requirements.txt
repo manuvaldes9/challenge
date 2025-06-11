@@ -11,3 +11,4 @@ openai
 faiss-cpu
 pydantic
 python-dotenv
+sse_starlette
