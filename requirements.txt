@@ -3,6 +3,12 @@ uvicorn
 langserve
 langgraph
 langchain
+langchain-core
+langchain-community
+langchain-huggingface
+langchain-openai
+sentence-transformers
+typing-extensions
 openai
 faiss-cpu
 pydantic
