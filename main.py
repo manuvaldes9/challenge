@@ -1,3 +1,9 @@
+import os
+import openai
+openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    raise RuntimeError("The variable OPENAI_API_KEY is not defined")
+    
 from fastapi import FastAPI
 from langserve import add_routes
 from langchain_core.runnables import RunnableLambda
