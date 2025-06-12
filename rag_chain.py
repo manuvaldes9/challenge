@@ -4,7 +4,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
-from langchain_core.runnables import RunnableLambda
 from typing_extensions import TypedDict, List
 from langgraph.graph import END, StateGraph
 
@@ -26,11 +25,11 @@ def build_retriever():
     loader = TextLoader("data/promtior_content.txt", encoding="utf-8")
     documents = loader.load()
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500, 
+        chunk_size=500,
         chunk_overlap=100
     )
     docs = splitter.split_documents(documents)
-    
+
     # Embeddings y vector store
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     vectorstore = FAISS.from_documents(docs, embeddings)
@@ -38,18 +37,18 @@ def build_retriever():
     return vectorstore
 
 def create_rag_chain(retriever):
-    # Construir cadena RAG    
+    # Construir cadena RAG
     def retrieve(state: State):
         retrieved_docs = retriever.similarity_search(state["question"])
         return {"question": state["question"], "context": retrieved_docs}
-    
-    
+
+
     def generate(state: State):
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
         messages = prompt.invoke({"question": state["question"], "context": docs_content})
         response = llm.invoke(messages)
         return {"answer": response.content}
-    
+
     builder = StateGraph(State)
     builder.add_node("retrieve", retrieve)
     builder.add_node("generate", generate)
@@ -60,3 +59,4 @@ def create_rag_chain(retriever):
     graph = builder.compile()
 
     return graph
+
