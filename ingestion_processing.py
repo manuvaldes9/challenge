@@ -32,7 +32,6 @@ def doc_creation ():
         separators=["\n=== ", "\n## ", "\n• ", ". ", "\n", " "]
     )
     docs = splitter.split_documents(all_docs)
-    print(f"📄 Split into {len(docs)} chunks")
 
     return docs
 
