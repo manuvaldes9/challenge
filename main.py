@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnableLambda
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from langserve import add_routes
-from rag_chain import create_rag_chain, build_retriever
+from rag_chain import create_rag_chain
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 if not openai.api_key:
@@ -22,8 +22,7 @@ app = FastAPI(
     description="A simple RAG chain app",
 )
 
-retriever = build_retriever()
-rag_chain = create_rag_chain(retriever)
+rag_chain = create_rag_chain()
 
 answer_runnable = RunnableLambda(
     lambda inp: rag_chain.invoke(inp)["result"]
