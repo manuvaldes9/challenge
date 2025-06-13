@@ -92,6 +92,6 @@ Access the chatbot via:
 
 ---
 
-## 🚀 Deployed Version (Railway)**
+## 🚀 Deployed Version (Railway)
 
 * **Access the live chatbot:** [rag-production-1a46.up.railway.app/chat/playground](https://rag-production-1a46.up.railway.app/chat/playground)
