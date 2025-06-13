@@ -1,62 +1,30 @@
-from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.documents import Document
-from langchain_core.runnables import RunnableLambda
-from typing_extensions import TypedDict, List
-from langgraph.graph import END, StateGraph
+from ingestion_processing import build_retriever
 
-# Estado tipado para LangChain
-class State(TypedDict, total=False):
-    question: str
-    context: List[Document]
-    answer: str
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+def prompt():
+    return ChatPromptTemplate.from_messages([
+        ("system", "You are a useful assistant that answers questions about Promptior"),
+        ("system", "You ONLY can answer questions with the context you have"),
+        ("system", "Use the context to respond the question of the user in a clear and concise way"),
+        ("system", "If you don't have the answer in your context answer 'I don't have that information'"),
+        ("human", "Question: {question}\n\nContext:\n{context}")
+    ])
 
-prompt = ChatPromptTemplate.from_messages([
-    ("Use the following context to respond the question of the user in a clear concise way"),
-    ("human", "Question: {question}\n\nContext:\n{context}")
-])
 
-def build_retriever():
-    # Carga de documentos y preparacion
-    loader = TextLoader("data/promtior_content.txt", encoding="utf-8")
-    documents = loader.load()
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500, 
-        chunk_overlap=100
-    )
-    docs = splitter.split_documents(documents)
-    
-    # Embeddings y vector store
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    vectorstore = FAISS.from_documents(docs, embeddings)
-
-    return vectorstore
-
-def create_rag_chain(retriever):
-    # Construir cadena RAG    
-    def retrieve(state: State):
-        retrieved_docs = retriever.similarity_search(state["question"])
-        return {"question": state["question"], "context": retrieved_docs}
-    
-    
-    def generate(state: State):
-        docs_content = "\n\n".join(doc.page_content for doc in state["context"])
-        messages = prompt.invoke({"question": state["question"], "context": docs_content})
-        response = llm.invoke(messages)
-        return {"answer": response.content}
-    
-    builder = StateGraph(State)
-    builder.add_node("retrieve", retrieve)
-    builder.add_node("generate", generate)
-    builder.set_entry_point("retrieve")
-    builder.add_edge("retrieve", "generate")
-    builder.add_edge("generate", END)
-    builder.set_finish_point("generate")
-    graph = builder.compile()
-
-    return graph
+# Construct RAG chain
+def create_rag_chain(retriever=build_retriever()):
+    try:
+        return RetrievalQA.from_chain_type(
+            llm=ChatOpenAI(model="gpt-3.5-turbo", temperature=0),
+            chain_type="stuff",
+            retriever=retriever,
+            chain_type_kwargs={"prompt": prompt()},
+            return_source_documents=False,
+            input_key="question"
+        )
+    except Exception as e:
+        print(f"Error creating RAG chain: {e}")
+        raise e

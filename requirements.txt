@@ -1,14 +1,12 @@
 fastapi
-uvicorn
 langserve
-langgraph
 langchain
 langchain-core
 langchain-community
 langchain-openai
-typing-extensions
 openai
 faiss-cpu
 pydantic
 python-dotenv
-sse_starlette
+
+
