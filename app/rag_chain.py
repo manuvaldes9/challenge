@@ -1,7 +1,7 @@
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from ingestion_processing import build_retriever
+from app.ingestion_processing  import build_retriever
 
 
 def prompt():
